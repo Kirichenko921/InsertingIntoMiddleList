@@ -18,7 +18,7 @@ class FineGrainedQueue
 	Node* head;
 	std::mutex* list_mutex;
 public:
-	
+
 	void insertIntoMiddle(int value, int pos)
 	{
 		int curPos = 2; // инизиализируем текущую позицию второй в списке (первая возможная при вставке в середину списка)
@@ -40,19 +40,22 @@ public:
 			{
 				current->node_mutex->lock();
 			}
-			else             // если мы хотим добавить позицию которая больше списка   (предполагается что метода size нет)      
+			else             // если мы хотим добавить позицию которая больше списка   
 			{
-				std::cout << "The list is over, select another insertion location" << std::endl;
-				previous->node_mutex->unlock(); 
-				current->node_mutex->unlock();
-				return;
+				break;
 			}
 		}
 		Node* newNode; // создаём новый узел 
 		newNode->node_mutex->lock(); // лочим  его 
 		newNode->value = value;  // помещаем переданные данные
 		previous->next = newNode; // новый узел делаем следующим для предыдущего 
-		newNode->next = current; // следующим для нового узла становится текущий 
+		if (current)
+			newNode->next = current; // следующим для нового узла становится текущий 
+		else
+		{
+			std::cout << "The list is smaller than the selected position. The data is recorded in " << curPos << " position" << std::endl;
+			newNode->next = nullptr; // если узел последний
+		}
 		previous->node_mutex->unlock();
 		newNode->node_mutex->unlock();
 		current->node_mutex->unlock();
